@@ -1,13 +1,21 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<GL/glut.h>
+#include<math.h>
+#include<stdbool.h>
 
-static int window_width, window_height;
+#define PI 3.1415926535
+#define TIMER_ID_0 0
+#define TIMER_ID_1 1
+#define TIMER_ID_2 2
+#define TIMER_INTERVAL 20
+
+static int window_width, window_height,animation_ongoing_S=0,animation_ongoing_D=0,animation_ongoing_A=0,xPomeraj=0,zPomeraj=0,zNemeraj=0;
 
 static void on_display(void);
 static void on_keyboard(unsigned char key, int x, int y);
 static void on_reshape(int width, int height);
-
+static void on_timer(int value);
 
 int main(int argc, char *argv[])
 {
@@ -16,7 +24,7 @@ int main(int argc, char *argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-	//pravimo prozor
+	//pravimo prozo2
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("el DJ por favor no pares la musica!");
@@ -38,14 +46,7 @@ int main(int argc, char *argv[])
 }
 
 
-static void on_keyboard(unsigned char key, int x, int y){
-	switch(key){
-		case 27:
-			exit(0);
-			break;
-	}
 
-}
 
 static void on_reshape(int width, int height){
 
@@ -66,10 +67,11 @@ static void on_display(void){
 	gluPerspective(60, (float)window_width/window_height, 1, 1500);
 
 	//postavljamo kameru
+	//kamera prati kretanje kocke
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(20, 35, 20, 
-			   0, 1, 0,
+	gluLookAt(-10+xPomeraj, 20, 5, 
+			   0+xPomeraj, 1, 0,
 			   0, 1, 0);
 
 	glLineWidth(6);
@@ -93,23 +95,112 @@ static void on_display(void){
 	//Napravila sam pod 
 	glColor3f(0.3764,0.3764,0.3764);
 	glPushMatrix();
-	glTranslatef(0,-5,0);
-	glScalef(30, 0, 30);
+	glTranslatef(450,-5,0);
+	glScalef(900, 0, 30);
 	
 	glutSolidCube(1);
 	glPopMatrix();
 	
 	//Napravila sam kockicu u beneton zelenoj boji :)
 	glColor3f(0,0.3686,0.082);
-	//glPushMatrix();
+	glPushMatrix();
 
-	//glPopMatrix();
+	glTranslatef(0+xPomeraj,0,0+zPomeraj-zNemeraj);
 	glutSolidCube(1);
+	glPopMatrix();
+	
+	//krug koji glumi rupu, u boji pozadine
 
-	glFlush();
+	glPushMatrix();
+
+	glTranslatef(24, 0, 0);
+
+	int i = 0;
+	glColor3f(0.75, 0.75, 0.75);
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex3f(0,0,0);
+	for(i =0; i <= 20; i++){
+		glVertex3f(cos(2*i*PI/20)*4, 0,sin(2*i*PI/20)*4);
+	}
+	glEnd();
+
+	glPopMatrix();
+
 
 	//menjamo bafere
 	glutSwapBuffers();
 
 
+}
+//u odnosu na S,A,D ili E kocka se pomera (pravo, levo, desno)ili staje
+static void on_keyboard(unsigned char key, int x, int y){
+	switch(key){
+		case 27:
+			exit(0);
+			break;
+		//start
+		case 's':
+		case 'S':{
+			animation_ongoing_S=1;
+			animation_ongoing_A=0;
+			animation_ongoing_D=0;
+			glutTimerFunc(50,on_timer,0);
+			break;
+		}
+		//desno
+		case 'd':
+		case 'D':{
+			animation_ongoing_D=1;
+			animation_ongoing_S=0;
+			animation_ongoing_A=0;
+			glutTimerFunc(50,on_timer,1);
+			break;
+		}
+		//levo
+		case 'a':
+		case 'A':{
+			animation_ongoing_A=1;
+			animation_ongoing_S=0;
+			animation_ongoing_D=0;
+			glutTimerFunc(50,on_timer,2);
+			break;
+		}
+		//!(start)
+		case 'e':
+		case 'E':{
+			animation_ongoing_S=0;
+			animation_ongoing_A=0;
+			animation_ongoing_D=0;
+			break;
+		}
+
+	}
+
+
+}
+//ovo je funkcija koja se poziva kada se klikne odredjeno slovo, i regulise kretanje
+static void on_timer(int value){
+	//kada se klikne na slovo S, kocka ide pravo
+		if(value == TIMER_ID_0 && animation_ongoing_S == 1){
+	
+			xPomeraj+=1;
+			glutPostRedisplay();
+			glutTimerFunc(50,on_timer,0);
+		}
+	//kada se klikne na slovo D, kocka ide desno
+		else if(value == TIMER_ID_1 && animation_ongoing_D == 1){
+			
+			zPomeraj+=1;
+			glutPostRedisplay();
+			glutTimerFunc(50,on_timer,1);
+		}
+	//kada se klikne na slovo A, kocka ide levo
+		else if(value == TIMER_ID_2 && animation_ongoing_A == 1){
+			
+			zNemeraj+=1;
+			glutPostRedisplay();
+			glutTimerFunc(50,on_timer,2);
+		}
+		else
+			return;
 }
