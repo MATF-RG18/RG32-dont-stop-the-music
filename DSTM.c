@@ -10,7 +10,7 @@
 #define TIMER_ID_2 2
 #define TIMER_INTERVAL 20
 
-static int window_width, window_height,animation_ongoing_S=0,animation_ongoing_D=0,animation_ongoing_A=0,xPomeraj=0,zPomeraj=0,zNemeraj=0;
+static int window_width, window_height,animation_ongoing_W=0,animation_ongoing_D=0,animation_ongoing_A=0,xPomeraj=0,zPomeraj=0,zNemeraj=0;
 
 static void on_display(void);
 static void on_keyboard(unsigned char key, int x, int y);
@@ -70,22 +70,23 @@ static void on_display(void){
 	//kamera prati kretanje kocke
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(-10+xPomeraj, 20, 5, 
-			   0+xPomeraj, 1, 0,
+	gluLookAt(-20+xPomeraj, 20, 15+zPomeraj-zNemeraj, 
+			   0+xPomeraj, 1, 0+zPomeraj-zNemeraj,
 			   0, 1, 0);
 
 	glLineWidth(6);
 
 	//iscrtavamo koordinatni sistem
 	glBegin(GL_LINES);
+		//X BLUE
 		glColor3f(0, 0, 1);
 		glVertex3f(0, 0, 0);
 		glVertex3f(100, 0, 0);
-
+		//Y GREEN
 		glColor3f(0, 1, 0);
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 100, 0);
-
+		//Z RED
 		glColor3f(1, 0, 0);
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 0, 100);
@@ -95,8 +96,8 @@ static void on_display(void){
 	//Napravila sam pod 
 	glColor3f(0.3764,0.3764,0.3764);
 	glPushMatrix();
-	glTranslatef(450,-5,0);
-	glScalef(900, 0, 30);
+	glTranslatef(450,-5,145);
+	glScalef(900, 0, 300);
 	
 	glutSolidCube(1);
 	glPopMatrix();
@@ -104,17 +105,14 @@ static void on_display(void){
 	//Napravila sam kockicu u beneton zelenoj boji :)
 	glColor3f(0,0.3686,0.082);
 	glPushMatrix();
-
+	//POCETNE KOORDINATE(0,0,10)
 	glTranslatef(0+xPomeraj,0,0+zPomeraj-zNemeraj);
 	glutSolidCube(1);
 	glPopMatrix();
-	
+	/*
 	//krug koji glumi rupu, u boji pozadine
-
 	glPushMatrix();
-
 	glTranslatef(24, 0, 0);
-
 	int i = 0;
 	glColor3f(0.75, 0.75, 0.75);
 	glBegin(GL_TRIANGLE_FAN);
@@ -123,9 +121,44 @@ static void on_display(void){
 		glVertex3f(cos(2*i*PI/20)*4, 0,sin(2*i*PI/20)*4);
 	}
 	glEnd();
-
+	glPopMatrix();
+	*/
+	//PUTANJA
+	//prvi deo
+	//prvi delic prvog dela
+	glColor3f(0.5,0.5,0.5);
+	glPushMatrix();
+	glTranslatef(10,-2,-0.3);
+	glScalef(20, 0, 4);
+	glutSolidCube(1);
 	glPopMatrix();
 
+	glPushMatrix();
+	glTranslatef(22,-2,7.65);
+	glScalef(4, 0, 20);
+	glutSolidCube(1);
+	glPopMatrix();
+	//drugi delic prvog dela
+	glPushMatrix();
+	glTranslatef(30,-2,19);
+	glScalef(20, 0, 4);
+	glutSolidCube(1);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(42,-2,29);
+	glScalef(4, 0, 24);//povecala sam za 4 duzinu
+	glutSolidCube(1);
+	glPopMatrix();
+
+	/*//Napravila sam pod 
+	glColor3f(0.3764,0.3764,0.3764);
+	glPushMatrix();
+	glTranslatef(450,-5,0);
+	glScalef(900, 0, 30);
+	
+	glutSolidCube(1);
+	glPopMatrix();*/
 
 	//menjamo bafere
 	glutSwapBuffers();
@@ -138,10 +171,10 @@ static void on_keyboard(unsigned char key, int x, int y){
 		case 27:
 			exit(0);
 			break;
-		//start
-		case 's':
-		case 'S':{
-			animation_ongoing_S=1;
+		//napred
+		case 'w':
+		case 'W':{
+			animation_ongoing_W=1;
 			animation_ongoing_A=0;
 			animation_ongoing_D=0;
 			glutTimerFunc(50,on_timer,0);
@@ -151,7 +184,7 @@ static void on_keyboard(unsigned char key, int x, int y){
 		case 'd':
 		case 'D':{
 			animation_ongoing_D=1;
-			animation_ongoing_S=0;
+			animation_ongoing_W=0;
 			animation_ongoing_A=0;
 			glutTimerFunc(50,on_timer,1);
 			break;
@@ -160,7 +193,7 @@ static void on_keyboard(unsigned char key, int x, int y){
 		case 'a':
 		case 'A':{
 			animation_ongoing_A=1;
-			animation_ongoing_S=0;
+			animation_ongoing_W=0;
 			animation_ongoing_D=0;
 			glutTimerFunc(50,on_timer,2);
 			break;
@@ -168,7 +201,7 @@ static void on_keyboard(unsigned char key, int x, int y){
 		//!(start)
 		case 'e':
 		case 'E':{
-			animation_ongoing_S=0;
+			animation_ongoing_W=0;
 			animation_ongoing_A=0;
 			animation_ongoing_D=0;
 			break;
@@ -180,8 +213,8 @@ static void on_keyboard(unsigned char key, int x, int y){
 }
 //ovo je funkcija koja se poziva kada se klikne odredjeno slovo, i regulise kretanje
 static void on_timer(int value){
-	//kada se klikne na slovo S, kocka ide pravo
-		if(value == TIMER_ID_0 && animation_ongoing_S == 1){
+	//kada se klikne na slovo W, kocka ide pravo
+		if(value == TIMER_ID_0 && animation_ongoing_W == 1){
 	
 			xPomeraj+=1;
 			glutPostRedisplay();
