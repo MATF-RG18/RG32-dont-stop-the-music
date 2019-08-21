@@ -3,7 +3,6 @@
 #include<GL/glut.h>
 #include<math.h>
 #include<stdbool.h>
-//#include<vlc/vlc.h>
 
 #define PI 3.1415926535
 #define TIMER_ID_0 0
@@ -14,11 +13,110 @@
 static int window_width, window_height;
 static int animation_ongoing_W=0,animation_ongoing_D=0,animation_ongoing_A=0;
 static int xPlus=0,zPlus=0,zMinus=0;
+static int x_trenutni=0, z_trenutni=0;
 
 static void on_display(void);
 static void on_keyboard(unsigned char key, int x, int y);
 static void on_reshape(int width, int height);
 static void on_timer(int value);
+
+int broj_prepreka=1;// 1 ili 2
+int tip_prepreke=1;// 1,2 ili 3
+
+/*
+ ---broj 1:
+ tip 1: x _ _
+ tip 2: _ x _
+ tip 3: _ _ x
+ 
+ ---broj 2:
+ tip 1: x x _
+ tip 2: _ x x
+ tip 3: x _ x
+ */
+
+void prve_prepreke(int broj_prepreka, int tip_prepreke){
+    glColor3f(0.9,0.9,0.9);
+    
+    if(broj_prepreka == 2){
+        if(tip_prepreke == 1){
+            // LEVO SREDINA
+            //levo
+            glPushMatrix();
+                glTranslatef(50,-3,5);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        
+            //sredina
+            glPushMatrix();
+                glTranslatef(50,-3,15);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        }
+        else if(tip_prepreke == 2){
+            //SREDINA DESNO
+            //sredina
+            glPushMatrix();
+                glTranslatef(75,-3,15);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+    
+            //desno
+            glPushMatrix();
+                glTranslatef(75,-3,25);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        }
+        else if(tip_prepreke ==3){
+            //LEVO DESNO
+            //levo
+            glPushMatrix();
+                glTranslatef(100,-3,5);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+            
+            //desno
+            glPushMatrix();
+                glTranslatef(100,-3,25);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        }
+        
+    }
+    if(broj_prepreka == 1){
+        if(tip_prepreke == 1){
+            //levo
+            glPushMatrix();
+                glTranslatef(125,-3,5);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        }
+        else if(tip_prepreke == 2){
+            //sredina
+            glPushMatrix();
+                glTranslatef(150,-3,15);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        }
+        else if(tip_prepreke ==3){
+            //desno
+            glPushMatrix();
+                glTranslatef(175,-3,25);
+                glScalef(4, 8, 8);
+                glutSolidCube(1);
+            glPopMatrix();
+        }
+        
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +128,7 @@ int main(int argc, char *argv[])
 	//pravimo prozor
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(100, 100);
-	glutCreateWindow("el DJ por favor no pares la musica!");
+	glutCreateWindow("kocka do kocke");
 
 	//postavljamo boju koja ce da cisti
 	glClearColor(0.75, 0.75, 0.75, 0);
@@ -41,23 +139,6 @@ int main(int argc, char *argv[])
 	glutKeyboardFunc(on_keyboard);
 
 	glEnable(GL_DEPTH_TEST);
-	//muzika
-	/*libvlc_instance_t *inst;
-	libvlc_media_player_t *mp;
-	libvlc_media_t *m;
-
-	inst = libvlc_new(0, NULL);
-	m = libvlc_media_new_path(inst, "easy.mp3");
-	mp = libvlc_media_player_new_from_media(m);
-	
-	libvlc_media_release(m);
-	libvlc_media_player_play(mp);
-	//sleep(20);
-	libvlc_media_player_stop(mp);
-	
-	libvlc_media_player_release(mp);
-	libvlc_release(inst);*/
-
 
 	//ulazimo u glavnu petlju
 	glutMainLoop();
@@ -72,7 +153,6 @@ static void on_reshape(int width, int height){
 }
 
 static void on_display(void){
-
 	//cistimo bufere
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -85,11 +165,13 @@ static void on_display(void){
 
 	//postavljamo kameru
 	//kamera prati kretanje kocke
+        
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0+xPlus, 70, 0+zPlus-zMinus, 
-			   0+xPlus, 1, 0+zPlus-zMinus,
-			   1, 0, 0);
+        
+        gluLookAt(-60+xPlus, 40, 0+zPlus-zMinus, //bilo je -40, 30, 0
+                    0+xPlus, 1, 0+zPlus-zMinus,//bilo je 0, 1,0
+                    1, 0, 0);
 
 	glLineWidth(6);
 
@@ -109,93 +191,45 @@ static void on_display(void){
 		glVertex3f(0, 0, 100);
 
 	glEnd();
-
-	//Napravila sam pod 
-	glColor3f(0.3764,0.3764,0.3764);
-	glPushMatrix();
-		glTranslatef(450,-5,145);
-		glScalef(900, 0, 300);
-		glutSolidCube(1);
-	glPopMatrix();
 	
 	//Napravila sam kockicu u beneton zelenoj boji :)
 	glColor3f(0,0.3686,0.082);
 	glPushMatrix();
 	//POCETNE KOORDINATE(0,0,10)
-		glTranslatef(0.5+xPlus,0,4+zPlus-zMinus);
-		glutSolidCube(1);
+		glTranslatef(0+xPlus,0,14+zPlus-zMinus);//0,3,0 je bilo
+		glutSolidCube(2);
 	glPopMatrix();
 
-	//PUTANJA
-
-	//prvi deo(cetvrtine)
-	glColor3f(1,0,0);
-	glPushMatrix();//duzina 40
-		glTranslatef(20,-2,4);
-		glScalef(40, 0, 8);
+	//PUTANJA 1.
+	glColor3f(0.8,0,0.2);
+	glPushMatrix();
+		glTranslatef(500,-3,5);
+		glScalef(1000, 5, 10);
 		glutSolidCube(1);
 	glPopMatrix();
-
-	glPushMatrix();//duzina 40
-		glTranslatef(36,-2,24);  
-		glScalef(8, 0, 32);
+        
+        //PUTANJA 2.
+	glColor3f(0.2,0,0.8);
+	glPushMatrix();
+		glTranslatef(500,-3,15);
+		glScalef(1000, 5, 10);
 		glutSolidCube(1);
 	glPopMatrix();
-
-	glPushMatrix();//duzina 40
-		glTranslatef(56,-2,36);
-		glScalef(32, 0, 8);
+        
+        //PUTANJA 3.
+	glColor3f(0.5,0,0.5);
+	glPushMatrix();
+		glTranslatef(500,-3,25);
+		glScalef(1000, 5, 10);
 		glutSolidCube(1);
 	glPopMatrix();
-
-	glPushMatrix();//duzina 40
-		glTranslatef(68,-2,56);
-		glScalef(8, 0, 32);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	//drugi deo(cetvrtine)
-	glColor3f(0,0,1);
-	glPushMatrix();//duzina 40
-		glTranslatef(88,-2,68);
-		glScalef(32, 0, 8);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glPushMatrix();//duzina 40
-		glTranslatef(100,-2,88);
-		glScalef(8, 0, 32);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glPushMatrix();//duzina 40
-		glTranslatef(120,-2,100);
-		glScalef(32, 0, 8);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glPushMatrix();//duzina 40
-		glTranslatef(132,-2,120);
-		glScalef(8, 0, 32);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	//treci deo(polovine)
-	glColor3f(0,1,0);
-	glPushMatrix();//duzina 72
-		glTranslatef(164,-2,140);
-		glScalef(72, 0, 8);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	glPushMatrix();//duzina 72
-		glTranslatef(196,-2,176);
-		glScalef(8, 0, 64);
-		glutSolidCube(1);
-	glPopMatrix();
-
-	//cetvrti deo(2*(1/4) + 4*(1/8))
-
+        
+        prve_prepreke(2,3);
+        prve_prepreke(1,3);
+        prve_prepreke(2,1);
+        prve_prepreke(1,1);
+        prve_prepreke(1,2);
+        prve_prepreke(2,2);
 
 	//menjamo bafere
 	glutSwapBuffers();
@@ -248,27 +282,49 @@ static void on_keyboard(unsigned char key, int x, int y){
 }
 //ovo je funkcija koja se poziva kada se klikne odredjeno slovo, i regulise kretanje
 static void on_timer(int value){
-	//kada se klikne na slovo W, kocka ide pravo
-		if(value == TIMER_ID_0 && animation_ongoing_W == 1){
-	
-			xPlus+=1;
-			glutPostRedisplay();
-			glutTimerFunc(50,on_timer,0);
-		}
-	//kada se klikne na slovo D, kocka ide desno
-		else if(value == TIMER_ID_1 && animation_ongoing_D == 1){
-			
-			zPlus+=1;
-			glutPostRedisplay();
-			glutTimerFunc(50,on_timer,1);
-		}
-	//kada se klikne na slovo A, kocka ide levo
-		else if(value == TIMER_ID_2 && animation_ongoing_A == 1){
-			
-			zMinus+=1;
-			glutPostRedisplay();
-			glutTimerFunc(50,on_timer,2);
-		}
-		else
-			return;
+    
+    if((value != TIMER_ID_0) && (value != TIMER_ID_1) && (value != TIMER_ID_2))
+        return;
+    
+    //kada se klikne na slovo W, kocka ide pravo
+    if(value == TIMER_ID_0 && animation_ongoing_W == 1){
+        xPlus+=1;
+        glutPostRedisplay();
+        glutTimerFunc(50,on_timer,0);
+    }
+    
+    //kada se klikne na slovo D, kocka ide desno
+    else if(value == TIMER_ID_1 && animation_ongoing_D == 1){
+        zPlus+=1;
+        glutPostRedisplay();
+        glutTimerFunc(50,on_timer,1);
+    }
+
+    //kada se klikne na slovo A, kocka ide levo
+    else if(value == TIMER_ID_2 && animation_ongoing_A == 1){			
+        zMinus+=1;
+        glutPostRedisplay();
+        glutTimerFunc(50,on_timer,2);
+    }
+    
+    x_trenutni=xPlus;
+    z_trenutni=14+zPlus-zMinus;
+    
+   /* if(x_trenutni >998){//prozorce ako se stigne do kraja! //FIXME nesto zabaguje
+        glutInitWindowSize(300, 50);
+        glutInitWindowPosition(560, 560);
+        glutCreateWindow("Budimo realni, nije bitno samo ucestvovati! POBEDA!");
+    }*/
+   
+   //ako se izadje sa putanje, igra se zavrsava
+    if(z_trenutni < 2 || z_trenutni > 28){
+        animation_ongoing_W=0;
+        animation_ongoing_D=0;
+        animation_ongoing_A=0;
+        glutInitWindowSize(250, 20);
+        glutInitWindowPosition(560, 560);
+        glutCreateWindow("Bitno je ucestvovati!");
+    }
+    
+                
 }
