@@ -10,7 +10,12 @@ static void on_keyboard(unsigned char key, int x, int y);
 static void on_release(unsigned char key,int x,int y);
 static void on_reshape(int width, int height);
 static void on_display();
+
+
 static int glavni_tajmer;
+
+void nebo();
+void pocetne_prepreke();
 
 typedef struct{
     float x,y,z;
@@ -83,12 +88,13 @@ static void on_keyboard(unsigned char key, int x, int y){
                     glutTimerFunc(30, igra ,timer_id1);
                     glavni_tajmer = 1;
             };break;
+    //levo
     case 'a':
     case 'A':
         kretanje[0] = 1;
         glutPostRedisplay();
         break;
-    //skretanje u desno
+    //desno
     case 'd':
     case 'D':
         kretanje[1] = 1;
@@ -111,36 +117,101 @@ static void on_reshape(int width, int height){
 static void on_display(void){
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     //kamera:
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(3,4,-6,
+    gluLookAt(3,4,-4.5,
                 3,0,5,
                 0.0,1.0,0.0);
+    
+    
+   //OSVETLJENJE
+    glShadeModel(GL_SMOOTH);
+    //Pozicija sveta
+    GLfloat light_position[] = { 5, 5, 5, 0 };//-0.3,2,1,0
+    
+    GLfloat light_ambient[] = { 0.5, 0.5, 0.5, 1 };
+    
+    GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
+    
+    GLfloat light_specular[] = { 0.6, 0.6, 0.6, 1 };
+    
+    //MATERIJALI za glavni objekat(kocku)
+    
+    GLfloat ambient_coeffs[] = { 0.24725, 0.1995, 0.0745, 1 };
+    
+    GLfloat diffuse_coeffs[] = { 0.7164 , 0.60648, 0.44648, 1};
+    
+    GLfloat specular_coeffs[] = { 0.628281 , 0.555802, 0.366065, 1 };
+    
+    GLfloat shininess = 0.7;
 
+    // Ukljucuje se osvjetljenje i podesavaju parametri svetla.
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+
+    // Podesavaju se parametri materijala
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);  
+
+    /*
     glBegin(GL_LINES);
+        //x
         glColor3f(1,0,0);
         glVertex3f(0,0,0);
         glVertex3f(100,0,0);
         glVertex3f(0,0,0);
         glVertex3f(-100,0,0);
-        
+        //y
         glColor3f(0,1,0);
         glVertex3f(0,0,0);
         glVertex3f(0,100,0);
         glVertex3f(0,0,0);
         glVertex3f(0,-100,0);
-
+        //z
         glColor3f(0,0,1);
         glVertex3f(0,0,0);
         glVertex3f(0,0,100);
         glVertex3f(0,0,0);
         glVertex3f(0,0,-100);
-    glEnd();
+    glEnd();*/
 
     // nebo();
     kocka();
+    
+    nebo();
+    
+    //OSVETLJENJE I MATERIJALI ZA PUTANJU 
+    
+    glShadeModel(GL_SMOOTH);    
+    GLfloat light_p[] = { 3, 3, 3, 0 };
+    GLfloat light_a[] = { 0.2, 0.2, 0.2, 1 };    
+    GLfloat light_d[] = { 0.7, 0.9, 0.9, 1 };    
+    GLfloat light_s[] = { 0.9, 0.9, 0.9, 1 };
+    
+    
+    GLfloat ambient_coeffs1[] = { 0.23125f, 0.23125f, 0.23125f, 1.0f };
+    GLfloat diffuse_coeffs1[] = { 0.2775f, 0.2775f, 0.2775f, 1.0f};
+    GLfloat specular_coeffs1[] = { 0.773911f, 0.773911f, 0.773911f, 1.0f };
+    
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_p);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_a);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_d);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_s);
+    
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs1);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs1);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs1);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
     
     putanja1();
     putanja2();
@@ -190,13 +261,13 @@ void igra(int value){
         nizp2[i].z -= 0.2;
     }
 
-    if(z_putanje1 <= -25) {
-        z_putanje1 = 75;
+    if(z_putanje1 <= -30) {//-25
+        z_putanje1 = 65;//75
         prepreke_putanja1();
     }
 
-    if(z_putanje2 <= -25) {
-        z_putanje2 = 75;
+    if(z_putanje2 <= -30) {
+        z_putanje2 = 65;
         prepreke_putanja2();
     }
 
@@ -233,7 +304,6 @@ void prepreke_putanja1(){
 void prepreke_putanja2(){
     int prepreka_u_redu = 0;
     br_prepreka2 = 0;
-    // printf("Aaaaa\n");
     static int moguce_x_koordinate_prepreke[] = {1,3,5};
     for(int i = 10 ; i < 50 ; i += 10){
         prepreka_u_redu = ((int)rand() % 2) + 1;
@@ -249,7 +319,6 @@ void prepreke_putanja2(){
             trenutna_prepreka++;
         }
     }
-    // printf("%d\n",br_prepreka2);
 }
 
 void kocka(){
@@ -262,7 +331,7 @@ void kocka(){
 
 void putanja1(){
     glPushMatrix();
-        glColor3f(1, 0, 0);
+        glColor3f(0.5, 0, 0);
         glTranslatef(x1_putanje1, y_putanje1, z_putanje1);
         glScalef(2, 0.5, 50);
         glutSolidCube(1);
@@ -287,21 +356,21 @@ void putanja2(){
     glPushMatrix();
         glColor3f(1, 0, 0);
         glTranslatef(x1_putanje2, y_putanje2, z_putanje2);
-        glScalef(2, 0.5, 50);
+        glScalef(2, 0.5, 54);
         glutSolidCube(1);
     glPopMatrix();
 
     glPushMatrix();
         glColor3f(0, 1, 0);
         glTranslatef(x2_putanje2, y_putanje2, z_putanje2);
-        glScalef(2, 0.5, 50);
+        glScalef(2, 0.5, 54);
         glutSolidCube(1);
     glPopMatrix();
 
     glPushMatrix();
         glColor3f(0, 0, 1);
         glTranslatef(x3_putanje2, y_putanje2, z_putanje2);
-        glScalef(2, 0.5, 50);
+        glScalef(2, 0.5, 54);
         glutSolidCube(1);
     glPopMatrix();
 }
@@ -320,6 +389,9 @@ void kolizija() {
             if (  (z_kocke + 0.25 >= nizp1[i].z - 1 ) && (x_kocke + 0.25 >= nizp1[i].x - 1 ) 
                 && (x_kocke - 0.25 <= nizp1[i].x + 1) && (z_kocke - 0.25 <= nizp1[i].z+1)){
                 glavni_tajmer = 0;
+                glutInitWindowSize(500, 20);
+                glutInitWindowPosition(150, 150);
+                glutCreateWindow("Bitno je ucestvovati!");
             }
         }
     }
@@ -328,17 +400,20 @@ void kolizija() {
             if (  (z_kocke + 0.25 >= nizp2[i].z - 1 ) && (x_kocke + 0.25 >= nizp2[i].x - 1 ) 
                 && (x_kocke - 0.25 <= nizp2[i].x + 1) && (z_kocke - 0.25 <= nizp2[i].z+1)){
                 glavni_tajmer = 0;
+                glutInitWindowSize(500, 20);
+                glutInitWindowPosition(150, 150);
+                glutCreateWindow("Bitno je ucestvovati!");
             }
         }
     }
 }
 
 
-// void nebo() {
-//     glPushMatrix();
-//         glColor3f(0, .5, .5);
-//         glTranslatef(3, 0, 0);
-//         glScalef(2, 0.5, 50);
-//         glutSolidSphere(25,50,50);
-//     glPopMatrix();
-// }
+void nebo() {
+    glPushMatrix();
+        glColor3f(0, .5, .5);
+        glTranslatef(2, 0, 0);
+        glScalef(2, 0.5, 20);
+        glutSolidSphere(25,30,30);
+    glPopMatrix();
+}
