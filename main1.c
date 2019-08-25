@@ -44,7 +44,8 @@ void putanja2();
 void igra(int value);
 void prepreke_putanja1();
 void prepreke_putanja2();
-void prepreka(double x, double y, double z);
+void iscrtaj_prepreku(double x, double y, double z);
+void kolizija();
 
 static int kretanje[] = {0,0};
 
@@ -107,8 +108,7 @@ static void on_reshape(int width, int height){
     gluPerspective(60, (float) width / height, 1, 1500);
 }
 
-static void on_display(void)
-{
+static void on_display(void){
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -147,12 +147,12 @@ static void on_display(void)
 
     for (int i = 0 ; i < br_prepreka1 ; i ++ ) {
         Prepreka pr = nizp1[i];
-        prepreka(pr.x, pr.y, pr.z);
+        iscrtaj_prepreku(pr.x, pr.y, pr.z);
     }
 
     for (int i = 0 ; i < br_prepreka2 ; i ++ ) {
         Prepreka pr = nizp2[i];
-        prepreka(pr.x, pr.y, pr.z);
+        iscrtaj_prepreku(pr.x, pr.y, pr.z);
     }
     
     glutSwapBuffers();
@@ -200,6 +200,8 @@ void igra(int value){
         prepreke_putanja2();
     }
 
+    kolizija();
+
     glutPostRedisplay();
     if(glavni_tajmer) {
         glutTimerFunc(30,igra,timer_id1);
@@ -231,7 +233,7 @@ void prepreke_putanja1(){
 void prepreke_putanja2(){
     int prepreka_u_redu = 0;
     br_prepreka2 = 0;
-    
+    // printf("Aaaaa\n");
     static int moguce_x_koordinate_prepreke[] = {1,3,5};
     for(int i = 10 ; i < 50 ; i += 10){
         prepreka_u_redu = ((int)rand() % 2) + 1;
@@ -247,6 +249,7 @@ void prepreke_putanja2(){
             trenutna_prepreka++;
         }
     }
+    // printf("%d\n",br_prepreka2);
 }
 
 void kocka(){
@@ -303,13 +306,33 @@ void putanja2(){
     glPopMatrix();
 }
 
-void prepreka(double x, double y, double z){
+void iscrtaj_prepreku(double x, double y, double z){
     glPushMatrix();
         glColor3f(0.6, .3, 0.4);
         glTranslatef(x, y, z);
         glutSolidCube(2);
     glPopMatrix();
 }
+
+void kolizija() {
+    if (z_putanje1 < z_putanje2){
+        for(int i = 0 ; i < br_prepreka1 ; i++){
+            if (  (z_kocke + 0.25 >= nizp1[i].z - 1 ) && (x_kocke + 0.25 >= nizp1[i].x - 1 ) 
+                && (x_kocke - 0.25 <= nizp1[i].x + 1) && (z_kocke - 0.25 <= nizp1[i].z+1)){
+                glavni_tajmer = 0;
+            }
+        }
+    }
+    else{
+        for(int i = 0 ; i < br_prepreka2 ; i++){
+            if (  (z_kocke + 0.25 >= nizp2[i].z - 1 ) && (x_kocke + 0.25 >= nizp2[i].x - 1 ) 
+                && (x_kocke - 0.25 <= nizp2[i].x + 1) && (z_kocke - 0.25 <= nizp2[i].z+1)){
+                glavni_tajmer = 0;
+            }
+        }
+    }
+}
+
 
 // void nebo() {
 //     glPushMatrix();
